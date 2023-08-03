@@ -128,7 +128,7 @@ To verify that Suricata is running, use the following command:
 sudo systemctl status suricata
 ```
 
-To trigger a fresh logrotate circuit and verify the output, use:
+To trigger a fresh logrotate circuit (if logrotate is configured) and verify the output, use:
 
 ```bash
 sudo logrotate /etc/logrotate.d/suricata 
@@ -140,7 +140,7 @@ To test a desktop notification, use the following command:
 notify-send "Alert Test"
 ```
 
-Tos test suricata alert trigger and notification curl the following url:
+To test suricata alert trigger and notification curl the following url:
 
 ```bash
 curl http://testmynids.org/uid/index.html
