@@ -6,6 +6,7 @@
 #include <time.h>
 
 #define MAX_LINE_LENGTH 4096
+#define SEEK_SET 1000
 #define TIMEZONE_OFFSET_SECONDS 3600
 #define ALERT_WINDOW_SECONDS 60
 
@@ -42,10 +43,41 @@ void process_alerts(const char *log_file)
         return;
     }
 
+    // Move the file pointer to the start of the last N lines
+    fseek(file, 0, SEEK_END);
+    long int total_lines = 0;
+    long int pos = ftell(file) - 1;
+    while (pos > 0 && total_lines < MAX_LINES_TO_PARSE)
+    {
+        fseek(file, pos, SEEK_SET);
+        if (fgetc(file) == '\n')
+        {
+            total_lines++;
+        }
+        pos--;
+    }
+
+    // Create a temporary file for the last N lines
+    FILE *temp_file = tmpfile();
+    if (temp_file == NULL)
+    {
+        perror("Error creating temporary file");
+        fclose(file);
+        return;
+    }
+
+    // Copy the last N lines into the temporary file
     char line[MAX_LINE_LENGTH];
+    while (fgets(line, sizeof(line), file) != NULL)
+    {
+        fputs(line, temp_file);
+    }
+
     time_t current_time = time(NULL); // Get the current time
 
-    while (fgets(line, sizeof(line), file) != NULL)
+    // Process the temporary file
+    fseek(temp_file, 0, SEEK_SET); // Reset the temporary file to the beginning
+    while (fgets(line, sizeof(line), temp_file) != NULL)
     {
         // Load the JSON object from the line
         json_error_t error;
@@ -93,6 +125,7 @@ void process_alerts(const char *log_file)
     }
 
     fclose(file);
+    fclose(temp_file);
 }
 
 int main()
