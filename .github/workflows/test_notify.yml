@@ -23,4 +23,4 @@ jobs:
         run: which notify-send || echo "notify-send not found"
 
       - name: Create and Run Notification Test Script
-        run:  export DISPLAY=:99 && sudo xvfb-run -a "-screen 0 1024x768x24" /usr/bin/notify-send "Test Notification" "This is a test message.";
+        run:  export DISPLAY=:99 && sudo xvfb-run -a -s "-screen 0 1024x768x24" /usr/bin/notify-send "Test Notification" "This is a test message.";
