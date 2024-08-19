@@ -88,6 +88,7 @@ RestartSec=60
 # Environment=DISPLAY=:0  # Example for X11-based systems
 
 [Install]
+# On systemd --user set this to user or default
 WantedBy=multi-user.target
 ```
 
