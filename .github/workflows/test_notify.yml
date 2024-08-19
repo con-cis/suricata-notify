@@ -30,10 +30,10 @@ jobs:
 
             echo "Running alternative notification command..."
             # Uncomment if using KDE
-            # kdialog --passivepopup "Test Notification" "This is a test message."
+            kdialog --passivepopup "Test Notification" "This is a test message."
 
             # Uncomment if using XFCE
-            # xfce4-notifyd "Test Notification" "This is a test message."
+            xfce4-notifyd "Test Notification" "This is a test message."
 
             echo "Notification test completed. Check logs for details."
           '
