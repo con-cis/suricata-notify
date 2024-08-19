@@ -1,0 +1,74 @@
+name: Build, Test, and Execute C Program
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install Dependencies
+        run: sudo apt-get update && sudo apt-get install -y build-essential libjansson-dev
+
+      - name: Compile C Program
+        run: gcc -o suricata-notify suricata-notify.c -ljansson
+
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: suricata-notify
+          path: suricata-notify
+          retention-days: 30
+
+  test:
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Download Build Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: suricata-notify
+          path: ./
+
+      - name: Create Test Data
+        run: |
+          echo '[
+              {
+                  "event_type": "alert",
+                  "timestamp": "2023-08-02T00:05:06.384656+0200",
+                  "alert": {
+                      "signature": "Test Signature 1",
+                      "category": "Test Category 1"
+                  }
+              },
+              {
+                  "event_type": "alert",
+                  "timestamp": "2023-08-02T00:06:00.000000+0200",
+                  "alert": {
+                      "signature": "Test Signature 2",
+                      "category": "Test Category 2"
+                  }
+              },
+              {
+                  "event_type": "alert",
+                  "timestamp": "2023-08-02T00:07:00.000000+0200",
+                  "alert": {
+                      "signature": "Test Signature 3",
+                      "category": "Test Category 3"
+                  }
+              }
+          ]' > eve.json
+
+      - name: Make Executable
+        run: chmod +x ./suricata-notify
+
+      - name: Execute Binary
+        run: ./suricata-notify eve.json
