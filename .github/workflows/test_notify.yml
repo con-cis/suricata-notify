@@ -1,26 +1,26 @@
-name: Desktop Notification Test
+# name: Desktop Notification Test
 
-on:
-  push:
-    branches: ["main"]
-  pull_request:
-    branches: ["main"]
+# on:
+#   push:
+#     branches: ["main"]
+#   pull_request:
+#     branches: ["main"]
 
-jobs:
-  test:
-    runs-on: ubuntu-latest
+# jobs:
+#   test:
+#     runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
+#     steps:
+#       - name: Checkout Code
+#         uses: actions/checkout@v3
 
-      - name: Set Up Dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y xvfb xfce4-notifyd x11-apps x11-utils strace libnotify-bin dbus-x11
+#       - name: Set Up Dependencies
+#         run: |
+#           sudo apt-get update
+#           sudo apt-get install -y xvfb xfce4-notifyd x11-apps x11-utils strace libnotify-bin dbus-x11
 
-      - name: Check Installed Packages
-        run: which notify-send || echo "notify-send not found"
+#       - name: Check Installed Packages
+#         run: which notify-send || echo "notify-send not found"
 
-      - name: Create and Run Notification Test Script
-        run:  export DISPLAY=:99 && sudo xvfb-run -a -s "-screen 0 1024x768x24" /usr/bin/notify-send "Test Notification" "This is a test message.";
+#       - name: Create and Run Notification Test Script
+#         run:  export DISPLAY=:99 && sudo xvfb-run -a -s "-screen 0 1024x768x24" /usr/bin/notify-send "Test Notification" "This is a test message.";

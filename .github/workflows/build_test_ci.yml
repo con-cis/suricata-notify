@@ -43,7 +43,7 @@ jobs:
       - name: Install Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y xvfb libnotify-bin strace
+          sudo apt-get install -y xvfb xfce4-notifyd x11-apps x11-utils strace libnotify-bin dbus-x11
 
       - name: Make Executable
         run: chmod +x suricata-notify
@@ -55,7 +55,7 @@ jobs:
       - name: Prepare Virtual Display and Test Notifications
         run: |
           # Run the program in a virtual display and capture strace logs
-          xvfb-run -a -s "-screen 0 1024x768x24" sh -c '
+            export DISPLAY=:99 && xvfb-run -a -s "-screen 0 1024x768x24" sh -c '
             echo "Running suricata-notify with strace..."
             strace -o /tmp/suricata-notify-strace.log ./suricata-notify eve.json
           '
