@@ -1,0 +1,61 @@
+name: Desktop Notification Test
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set Up Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb x11-apps x11-utils strace
+
+      - name: Prepare Virtual Display and Test Notifications
+        run: |
+          # Create a script for testing notifications
+          cat << 'EOF' > test_notifications.sh
+          #!/bin/bash
+
+          # Test script for desktop notifications
+
+          # Set up the virtual display and capture strace logs
+          xvfb-run -a -s "-screen 0 1024x768x24" sh -c '
+            echo "Running notify-send test..."
+            strace -o /tmp/notify-send-strace.log notify-send "Test Notification" "This is a test message."
+
+            echo "Running alternative notification command..."
+            # Uncomment if using KDE
+            # kdialog --passivepopup "Test Notification" "This is a test message."
+
+            # Uncomment if using XFCE
+            # xfce4-notifyd "Test Notification" "This is a test message."
+
+            echo "Notification test completed. Check logs for details."
+          '
+
+          # Make the script executable
+          chmod +x test_notifications.sh
+
+          # Execute the test script
+          ./test_notifications.sh
+
+          # Display logs
+          echo "Displaying strace log:"
+          cat /tmp/notify-send-strace.log
+        env:
+          DISPLAY: :99 # Set the DISPLAY environment variable for xvfb
+
+      - name: Check Notification Test Log
+        run: |
+          if grep -q "notify-send" /tmp/notify-send-strace.log; then
+            echo "Notification test passed"
+            exit 0
+          else
+            echo "Notification test failed"
+            exit 1
+          fi
