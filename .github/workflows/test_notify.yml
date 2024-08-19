@@ -20,4 +20,4 @@ jobs:
           sudo apt-get install -y xvfb xfce4-notifyd x11-apps x11-utils strace
 
       - name: Create and Run Notification Test Script
-        run:  export DISPLAY=:99 && sudo xvfb-run -a :99 "-screen 0 1024x768x24" xfce4-notifyd "Test Notification" "This is a test message.";
+        run:  export DISPLAY=:99 && sudo xvfb-run -a "-screen 0 1024x768x24" xfce4-notifyd "Test Notification" "This is a test message.";
