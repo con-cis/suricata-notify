@@ -1,6 +1,10 @@
 name: Desktop Notification Test
 
-on: [push, pull_request]
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
 
 jobs:
   test:
@@ -15,29 +19,29 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y xvfb x11-apps x11-utils strace
 
-      - name: Prepare Virtual Display and Test Notifications
+      - name: Create and Run Notification Test Script
         run: |
           # Create a script for testing notifications
           cat << 'EOF' > test_notifications.sh
           #!/bin/bash
-
           # Test script for desktop notifications
 
           # Set up the virtual display and capture strace logs
           xvfb-run -a -s "-screen 0 1024x768x24" sh -c '
             echo "Running notify-send test..."
             strace -o /tmp/notify-send-strace.log notify-send "Test Notification" "This is a test message."
+            if [ $? -ne 0 ]; then
+              echo "notify-send failed"
+              exit 1
+            fi
 
             echo "Running alternative notification command..."
             # Uncomment if using KDE
-            kdialog --passivepopup "Test Notification" "This is a test message."
-
+            # kdialog --passivepopup "Test Notification" "This is a test message."
             # Uncomment if using XFCE
-            xfce4-notifyd "Test Notification" "This is a test message."
-
+            # xfce4-notifyd "Test Notification" "This is a test message."
             echo "Notification test completed. Check logs for details."
           '
-
           # Make the script executable
           chmod +x test_notifications.sh
 
@@ -52,10 +56,15 @@ jobs:
 
       - name: Check Notification Test Log
         run: |
-          if grep -q "notify-send" /tmp/notify-send-strace.log; then
-            echo "Notification test passed"
-            exit 0
+          if [ -f /tmp/notify-send-strace.log ]; then
+            if grep -q "notify-send" /tmp/notify-send-strace.log; then
+              echo "Notification test passed"
+              exit 0
+            else
+              echo "Notification test failed"
+              exit 1
+            fi
           else
-            echo "Notification test failed"
+            echo "Strace log file not found"
             exit 1
           fi
