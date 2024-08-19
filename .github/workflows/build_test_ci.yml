@@ -44,6 +44,15 @@ jobs:
       - name: Make Executable
         run: chmod +x ./suricata-notify
 
+      - name: Check if notify is installed
+        run: which notify-send
+
+      - name: Send test notification
+        run: notify-send "Test Notification"
+
+      - name: Set display env
+        run: export DISPLAY=:0
+
       - name: Run Program with strace
         run: |
           strace -e trace=execve ./suricata-notify eve.json 2>&1 | tee strace.log
