@@ -41,8 +41,17 @@ jobs:
     - name: List Downloaded Files
       run: ls -la
 
+    - name: Check File Contents
+      run: file ./suricata-notify  # Check the file type to ensure it's executable
+
     - name: Make Executable
-      run: chmod +x suricata-notify
+      run: chmod +x ./suricata-notify
 
     - name: Execute Binary
-      run: ./suricata-notify
+      run: ./suricata-notify   # Include './' to indicate current directory
+
+    - name: Print Working Directory
+      run: pwd   # Print the current working directory for debugging
+
+    - name: List Directory Contents
+      run: ls -la  # List all files and directories to verify presence and permissions
