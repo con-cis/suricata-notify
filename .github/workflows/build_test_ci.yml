@@ -57,7 +57,7 @@ jobs:
           # Run the program in a virtual display and capture strace logs
             export DISPLAY=:99 && xvfb-run -a -s "-screen 0 1024x768x24" sh -c '
             echo "Running suricata-notify with strace..."
-            strace -o /tmp/suricata-notify-strace.log ./suricata-notify eve.json
+            strace -o /tmp/suricata-notify-strace.log ./suricata-notify --test
           '
 
       - name: Upload Strace Log
