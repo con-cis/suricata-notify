@@ -23,22 +23,7 @@ jobs:
         run: |
             export DISPLAY=:99
             # Set up the virtual display and capture strace logs
-            sudo xvfb -ac :99 "-screen 0 1024x768x24" > /dev/null 2>&1 & '
-                echo "Running notify-send test...";
-                strace -o /tmp/notify-send-strace.log xfce4-notifyd "Test Notification" "This is a test message.";
-                if [ $? -ne 0 ]; then
-                echo "notify-send failed";
-                exit 1;
-                fi
-
-                echo "Running alternative notification command...";
-                # Uncomment if using KDE
-                # kdialog --passivepopup "Test Notification" "This is a test message.";
-                # Uncomment if using XFCE
-                # xfce4-notifyd "Test Notification" "This is a test message.";
-                echo "Notification test completed. Check logs for details.";
-            '
-
+            sudo xvfb -ac :99 "-screen 0 1024x768x24" > /dev/null 2>&1 & strace -o /tmp/notify-send-strace.log xfce4-notifyd "Test Notification" "This is a test message.";
             # Display logs
             echo "Displaying strace log:";
             cat /tmp/notify-send-strace.log
