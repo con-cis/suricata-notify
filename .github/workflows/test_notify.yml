@@ -17,12 +17,13 @@ jobs:
       - name: Set Up Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y xvfb x11-apps x11-utils strace
+          sudo apt-get install -y xvfb xfce4-notifyd x11-apps x11-utils strace
 
       - name: Create and Run Notification Test Script
         run: |
+            export DISPLAY=:99
             # Set up the virtual display and capture strace logs
-            xvfb-run -a -s "-screen 0 1024x768x24" sh -c '
+            sudo xvfb -ac :99 "-screen 0 1024x768x24" > /dev/null 2>&1 & '
                 echo "Running notify-send test...";
                 strace -o /tmp/notify-send-strace.log kdialog --passivepopup "Test Notification" "This is a test message.";
                 if [ $? -ne 0 ]; then
