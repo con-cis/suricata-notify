@@ -20,7 +20,27 @@ jobs:
           sudo apt-get install -y xvfb x11-apps x11-utils strace
 
       - name: Create and Run Notification Test Script
-        run: bash -c 'cat << "EOF" > test_notifications.sh; #!/bin/bash; # Test script for desktop notifications; xvfb-run -a -s "-screen 0 1024x768x24" sh -c "echo \"Running notify-send test...\"; strace -o /tmp/notify-send-strace.log notify-send \"Test Notification\" \"This is a test message.\"; if [ $? -ne 0 ]; then echo \"notify-send failed\"; exit 1; fi; echo \"Running alternative notification command...\"; # Uncomment if using KDE; # kdialog --passivepopup \"Test Notification\" \"This is a test message.\"; # Uncomment if using XFCE; # xfce4-notifyd \"Test Notification\" \"This is a test message.\"; echo \"Notification test completed. Check logs for details.\""; chmod +x test_notifications.sh; ./test_notifications.sh; echo "Displaying strace log:"; cat /tmp/notify-send-strace.log; EOF'
+        run: |
+            # Set up the virtual display and capture strace logs
+            xvfb-run -a -s "-screen 0 1024x768x24" sh -c '
+                echo "Running notify-send test...";
+                strace -o /tmp/notify-send-strace.log notify-send "Test Notification" "This is a test message.";
+                if [ $? -ne 0 ]; then
+                echo "notify-send failed";
+                exit 1;
+                fi
+
+                echo "Running alternative notification command...";
+                # Uncomment if using KDE
+                # kdialog --passivepopup "Test Notification" "This is a test message.";
+                # Uncomment if using XFCE
+                # xfce4-notifyd "Test Notification" "This is a test message.";
+                echo "Notification test completed. Check logs for details.";
+            '
+
+            # Display logs
+            echo "Displaying strace log:";
+            cat /tmp/notify-send-strace.log
         env:
           DISPLAY: :99 # Set the DISPLAY environment variable for xvfb
 

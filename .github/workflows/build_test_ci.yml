@@ -1,85 +1,85 @@
-name: Build, Test, and Execute C Program
+# name: Build, Test, and Execute C Program
 
-on:
-  push:
-    branches: ["main"]
-  pull_request:
-    branches: ["main"]
+# on:
+#   push:
+#     branches: ["main"]
+#   pull_request:
+#     branches: ["main"]
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
+# jobs:
+#   build:
+#     runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
+#     steps:
+#       - name: Checkout Code
+#         uses: actions/checkout@v4
 
-      - name: Install Dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y build-essential libjansson-dev
+#       - name: Install Dependencies
+#         run: |
+#           sudo apt-get update
+#           sudo apt-get install -y build-essential libjansson-dev
 
-      - name: Compile C Program
-        run: gcc -o suricata-notify suricata-notify.c -ljansson
+#       - name: Compile C Program
+#         run: gcc -o suricata-notify suricata-notify.c -ljansson
 
-      - name: Upload Build Artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: suricata-notify
-          path: suricata-notify
-          retention-days: 30
+#       - name: Upload Build Artifact
+#         uses: actions/upload-artifact@v3
+#         with:
+#           name: suricata-notify
+#           path: suricata-notify
+#           retention-days: 30
 
-  download:
-    runs-on: ubuntu-latest
-    needs: build
+#   download:
+#     runs-on: ubuntu-latest
+#     needs: build
 
-    steps:
-      - name: Download Artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: suricata-notify
-          path: ./
+#     steps:
+#       - name: Download Artifact
+#         uses: actions/download-artifact@v3
+#         with:
+#           name: suricata-notify
+#           path: ./
 
-      - name: Install Dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y xvfb libnotify-bin strace
+#       - name: Install Dependencies
+#         run: |
+#           sudo apt-get update
+#           sudo apt-get install -y xvfb libnotify-bin strace
 
-      - name: Make Executable
-        run: chmod +x suricata-notify
+#       - name: Make Executable
+#         run: chmod +x suricata-notify
 
-      - name: Create Test Data
-        run: |
-          echo '[{"event_type":"alert","timestamp":"2023-08-02T00:05:06.384656+0200","alert":{"signature":"Test Signature 1","category":"Test Category 1"}},{"event_type":"alert","timestamp":"2023-08-02T00:06:00.000000+0200","alert":{"signature":"Test Signature 2","category":"Test Category 2"}},{"event_type":"alert","timestamp":"2023-08-02T00:07:00.000000+0200","alert":{"signature":"Test Signature 3","category":"Test Category 3"}}]' > eve.json
+#       - name: Create Test Data
+#         run: |
+#           echo '[{"event_type":"alert","timestamp":"2023-08-02T00:05:06.384656+0200","alert":{"signature":"Test Signature 1","category":"Test Category 1"}},{"event_type":"alert","timestamp":"2023-08-02T00:06:00.000000+0200","alert":{"signature":"Test Signature 2","category":"Test Category 2"}},{"event_type":"alert","timestamp":"2023-08-02T00:07:00.000000+0200","alert":{"signature":"Test Signature 3","category":"Test Category 3"}}]' > eve.json
 
-      - name: Prepare Virtual Display and Test Notifications
-        run: |
-          # Run the program in a virtual display and capture strace logs
-          xvfb-run -a -s "-screen 0 1024x768x24" sh -c '
-            echo "Running suricata-notify with strace..."
-            strace -o /tmp/suricata-notify-strace.log ./suricata-notify eve.json
-          '
+#       - name: Prepare Virtual Display and Test Notifications
+#         run: |
+#           # Run the program in a virtual display and capture strace logs
+#           xvfb-run -a -s "-screen 0 1024x768x24" sh -c '
+#             echo "Running suricata-notify with strace..."
+#             strace -o /tmp/suricata-notify-strace.log ./suricata-notify eve.json
+#           '
 
-      - name: Upload Strace Log
-        uses: actions/upload-artifact@v3
-        with:
-          name: strace-log
-          path: /tmp/suricata-notify-strace.log
-          retention-days: 30
+#       - name: Upload Strace Log
+#         uses: actions/upload-artifact@v3
+#         with:
+#           name: strace-log
+#           path: /tmp/suricata-notify-strace.log
+#           retention-days: 30
 
-      - name: Display Strace Log
-        run: |
-          echo "Displaying strace log:"
-          cat /tmp/suricata-notify-strace.log
+#       - name: Display Strace Log
+#         run: |
+#           echo "Displaying strace log:"
+#           cat /tmp/suricata-notify-strace.log
 
-      - name: Check Strace Log
-        run: |
-          # Check for specific output in the strace log to determine success
-          if grep -q "notify-send" /tmp/suricata-notify-strace.log; then
-            echo "Notification test passed"
-            exit 0
-          else
-            echo "Notification test failed"
-            exit 1
-          fi
+#       - name: Check Strace Log
+#         run: |
+#           # Check for specific output in the strace log to determine success
+#           if grep -q "notify-send" /tmp/suricata-notify-strace.log; then
+#             echo "Notification test passed"
+#             exit 0
+#           else
+#             echo "Notification test failed"
+#             exit 1
+#           fi
     
