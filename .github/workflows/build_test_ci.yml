@@ -70,5 +70,8 @@ jobs:
       - name: Make Executable
         run: chmod +x ./suricata-notify
 
+      - name: Verify JSON File Content
+        run: cat eve.json
+
       - name: Execute Binary
         run: ./suricata-notify eve.json
