@@ -42,7 +42,7 @@ jobs:
       run: ls -la
 
     - name: Make Executable
-      run: chmod +x ./suricata-notify
+      run: chmod +x suricata-notify
 
     - name: Execute Binary
-      run: ./suricata-notify
+      run: suricata-notify
