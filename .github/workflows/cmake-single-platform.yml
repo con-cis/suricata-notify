@@ -24,7 +24,7 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: suricata-notify
-        path: ./suricata-notify
+        path: suricata-notify   # Upload only the executable file
         retention-days: 30  # Retain the artifact for 30 days
 
   download:
@@ -36,10 +36,10 @@ jobs:
       uses: actions/download-artifact@v3
       with:
         name: suricata-notify
-        path: ./suricata-notify
+        path: ./   # Download directly to the current directory
 
     - name: List Downloaded Files
-      run: ls -la ./suricata-notify
+      run: ls -la
 
     - name: Make Executable
       run: chmod +x ./suricata-notify
