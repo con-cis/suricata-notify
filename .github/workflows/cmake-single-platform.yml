@@ -24,8 +24,8 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: suricata-notify
-        path: suricata-notify   # Upload only the executable file
-        retention-days: 30  # Retain the artifact for 30 days
+        path: suricata-notify
+        retention-days: 30
 
   download:
     runs-on: ubuntu-latest
@@ -36,22 +36,25 @@ jobs:
       uses: actions/download-artifact@v3
       with:
         name: suricata-notify
-        path: ./   # Download directly to the current directory
+        path: ./
 
     - name: List Downloaded Files
       run: ls -la
 
-    - name: Check File Contents
-      run: file ./suricata-notify  # Check the file type to ensure it's executable
+    - name: Check File Type
+      run: file ./suricata-notify
 
     - name: Make Executable
       run: chmod +x ./suricata-notify
 
-    - name: Execute Binary
-      run: ./suricata-notify   # Include './' to indicate current directory
+    - name: Verify Executable Permissions
+      run: ls -l ./suricata-notify
 
     - name: Print Working Directory
-      run: pwd   # Print the current working directory for debugging
+      run: pwd
 
     - name: List Directory Contents
-      run: ls -la  # List all files and directories to verify presence and permissions
+      run: ls -la
+
+    - name: Execute Binary
+      run: ./suricata-notify
