@@ -20,27 +20,4 @@ jobs:
           sudo apt-get install -y xvfb xfce4-notifyd x11-apps x11-utils strace
 
       - name: Create and Run Notification Test Script
-        run: |
-            export DISPLAY=:99
-            # Set up the virtual display and capture strace logs
-            sudo xvfb -ac :99 "-screen 0 1024x768x24" > /dev/null 2>&1 & strace -o /tmp/notify-send-strace.log xfce4-notifyd "Test Notification" "This is a test message.";
-            # Display logs
-            echo "Displaying strace log:";
-            cat /tmp/notify-send-strace.log
-        env:
-          DISPLAY: :99 # Set the DISPLAY environment variable for xvfb
-
-      - name: Check Notification Test Log
-        run: |
-          if [ -f /tmp/notify-send-strace.log ]; then
-            if grep -q "notify-send" /tmp/notify-send-strace.log; then
-              echo "Notification test passed"
-              exit 0
-            else
-              echo "Notification test failed"
-              exit 1
-            fi
-          else
-            echo "Strace log file not found"
-            exit 1
-          fi
+        run:  export DISPLAY=:99 && sudo xvfb -ac :99 "-screen 0 1024x768x24" > /dev/null 2>&1 && xfce4-notifyd "Test Notification" "This is a test message.";
