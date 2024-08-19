@@ -39,13 +39,12 @@ jobs:
           path: ./
 
       - name: Create Test Data
-        run: echo '[{"event_type":"alert","timestamp":"2023-08-02T00:05:06.384656+0200","alert":{"signature":"Test Signature 1","category":"Test Category 1"}},{"event_type":"alert","timestamp":"2023-08-02T00:06:00.000000+0200","alert":{"signature":"Test Signature 2","category":"Test Category 2"}},{"event_type":"alert","timestamp":"2023-08-02T00:07:00.000000+0200","alert":{"signature":"Test Signature 3","category":"Test Category 3"}}]' > eve.json   
+        run: echo '[{"event_type":"alert","timestamp":"2023-08-02T00:05:06.384656+0200","alert":{"signature":"Test Signature 1","category":"Test Category 1"}},{"event_type":"alert","timestamp":"2023-08-02T00:06:00.000000+0200","alert":{"signature":"Test Signature 2","category":"Test Category 2"}},{"event_type":"alert","timestamp":"2023-08-02T00:07:00.000000+0200","alert":{"signature":"Test Signature 3","category":"Test Category 3"}}]' > eve.json
 
       - name: Make Executable
         run: chmod +x ./suricata-notify
 
-      - name: Verify JSON File Content
-        run: cat eve.json
-
-      - name: Execute Binary
-        run: ./suricata-notify eve.json
+      - name: Run Program with strace
+        run: |
+          strace -e trace=execve ./suricata-notify eve.json 2>&1 | tee strace.log
+          grep "notify-send" strace.log || (echo "Test failed: notify-send not executed correctly" && exit 1)

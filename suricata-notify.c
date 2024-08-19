@@ -125,15 +125,24 @@ void process_alerts(const char *log_file)
 
 int main(int argc, char *argv[])
 {
-    const char *default_log_file = "/var/log/suricata/eve.json";
-    const char *log_file = default_log_file;
+    int is_test = 0;
 
-    // Check if a log file path is provided as a command-line argument
-    if (argc > 1)
+    // Check if the flag for testing mode is passed
+    if (argc > 1 && strcmp(argv[1], "--test") == 0)
     {
-        log_file = argv[1];
+        is_test = 1;
     }
 
-    process_alerts(log_file);
+    if (is_test)
+    {
+        // Simulate notifications by logging
+        send_notification("Test notification");
+    }
+    else
+    {
+        const char *suricata_log = (argc > 1) ? argv[1] : "/var/log/suricata/eve.json";
+        process_alerts(suricata_log);
+    }
+
     return 0;
 }
