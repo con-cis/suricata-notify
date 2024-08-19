@@ -24,7 +24,7 @@ jobs:
             # Set up the virtual display and capture strace logs
             xvfb-run -a -s "-screen 0 1024x768x24" sh -c '
                 echo "Running notify-send test...";
-                strace -o /tmp/notify-send-strace.log notify-send "Test Notification" "This is a test message.";
+                strace -o /tmp/notify-send-strace.log xfce4-notifyd "Test Notification" "This is a test message.";
                 if [ $? -ne 0 ]; then
                 echo "notify-send failed";
                 exit 1;
