@@ -20,29 +20,33 @@ void process_alerts(const char *log_file);
 // Function to send a desktop notification with signature and category
 void send_notification(const char *alert_message)
 {
-    pid_t pid = fork();
+    // pid_t pid = fork();
 
-    if (pid < 0)
-    {
-        perror("fork failed");
-        return;
-    }
+    // if (pid < 0)
+    // {
+    //     perror("fork failed");
+    //     return;
+    // }
 
-    if (pid == 0)
-    { // Child process
-        execlp("notify-send", "notify-send", "Suricata Alert", alert_message, (char *)NULL);
-        perror("execlp failed");
-        exit(EXIT_FAILURE);
-    }
-    else
-    { // Parent process
-        int status;
-        waitpid(pid, &status, 0);
-        if (WIFEXITED(status) && WEXITSTATUS(status) != 0)
-        {
-            fprintf(stderr, "notify-send failed with exit code %d\n", WEXITSTATUS(status));
-        }
-    }
+    // if (pid == 0)
+    // { // Child process
+    //     execlp("notify-send", "notify-send", "Suricata Alert", alert_message, (char *)NULL);
+    //     perror("execlp failed");
+    //     exit(EXIT_FAILURE);
+    // }
+    // else
+    // { // Parent process
+    //     int status;
+    //     waitpid(pid, &status, 0);
+    //     if (WIFEXITED(status) && WEXITSTATUS(status) != 0)
+    //     {
+    //         fprintf(stderr, "notify-send failed with exit code %d\n", WEXITSTATUS(status));
+    //     }
+    // }
+    char command[MAX_LINE_LENGTH];
+    snprintf(command, sizeof(command), "notify-send \"Suricata Alert\" \"%s\"", alert_message);
+    system(command);
+    return 0;
 }
 
 // Function to convert ISO 8601 timestamp to time_t (Unix timestamp)
