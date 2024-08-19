@@ -1,14 +1,10 @@
-name: Build, Test, and Execute C Program with CMake
+name: Build, Test, and Execute C Program
 
 on:
   push:
     branches: ['main']
   pull_request:
     branches: ['main']
-
-env:
-  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
-  BUILD_TYPE: Release
 
 jobs:
   build:
@@ -18,24 +14,17 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v4
 
-    - name: Install Build Essentials and Dependencies
-      run: sudo apt-get update && sudo apt-get install -y build-essential libjansson-dev cmake
+    - name: Install Dependencies
+      run: sudo apt-get update && sudo apt-get install -y build-essential libjansson-dev
 
-    - name: Configure CMake
-      run: cmake -B build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
-
-    - name: Build
-      run: cmake --build build --config ${{env.BUILD_TYPE}}
-
-    - name: Test
-      working-directory: build
-      run: ctest -C ${{env.BUILD_TYPE}}
+    - name: Compile C Program
+      run: gcc -o suricata-notify suricata-notify.c -ljansson
 
     - name: Upload Build Artifact
       uses: actions/upload-artifact@v3
       with:
-        name: suricata-notify-${{env.BUILD_TYPE}}
-        path: build/suricata-notify
+        name: suricata-notify
+        path: ./suricata-notify
         retention-days: 30  # Retain the artifact for 30 days
 
   download:
@@ -46,14 +35,14 @@ jobs:
     - name: Download Artifact
       uses: actions/download-artifact@v3
       with:
-        name: suricata-notify-${{env.BUILD_TYPE}}
-        path: build/
+        name: suricata-notify
+        path: ./suricata-notify
 
     - name: List Downloaded Files
-      run: ls -la build/
+      run: ls -la ./suricata-notify
 
     - name: Make Executable
-      run: chmod +x build/suricata-notify
+      run: chmod +x ./suricata-notify
 
     - name: Execute Binary
-      run: ./build/suricata-notify
+      run: ./suricata-notify
