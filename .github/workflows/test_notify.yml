@@ -17,13 +17,10 @@ jobs:
       - name: Set Up Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y xvfb xfce4-notifyd x11-apps x11-utils strace libnotify-bin
+          sudo apt-get install -y xvfb xfce4-notifyd x11-apps x11-utils strace libnotify-bin dbus-x11
 
       - name: Check Installed Packages
-        run: |
-            which notify-send || echo "notify-send not found"
-            which kdialog || echo "kdialog not found"
-            which xfce4-notifyd || echo "xfce4-notifyd not found"
+        run: which notify-send || echo "notify-send not found"
 
       - name: Create and Run Notification Test Script
         run:  export DISPLAY=:99 && sudo xvfb-run -a "-screen 0 1024x768x24" /usr/bin/notify-send "Test Notification" "This is a test message.";
