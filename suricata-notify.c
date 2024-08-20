@@ -142,6 +142,9 @@ int main(int argc, char *argv[])
     else
     {
         const char *suricata_log = (argc > 1) ? argv[1] : "/var/log/suricata/eve.json";
+        printf("Test notification");
+        printf("Test notification");
+        printf("Test notification");
         process_alerts(suricata_log);
     }
 
