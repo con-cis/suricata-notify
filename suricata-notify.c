@@ -156,31 +156,46 @@ void process_alerts(const char *log_file)
 int main(int argc, char *argv[])
 {
     int is_test = 0;
+    const char *suricata_log = "/var/log/suricata/eve.json"; // Default log file path
 
-    // Check for verbose flag
     for (int i = 1; i < argc; i++)
     {
         if (strcmp(argv[i], "-v") == 0 || strcmp(argv[i], "--verbose") == 0)
         {
             verbose = 1;
-            break;
         }
-    }
-
-    // Check if the flag for testing mode is passed
-    if (argc > 1 && strcmp(argv[1], "--test") == 0)
-    {
-        is_test = 1;
+        else if (strcmp(argv[i], "-t") == 0 || strcmp(argv[i], "--test") == 0)
+        {
+            is_test = 1;
+        }
+        else if (strcmp(argv[i], "-e") == 0 || strcmp(argv[i], "--eve-json") == 0)
+        {
+            if (i + 1 < argc)
+            {
+                suricata_log = argv[i + 1]; // Get the log file name
+                i++;                        // Skip the log file argument
+            }
+            else
+            {
+                fprintf(stderr, "Error: Missing argument for %s\n", argv[i]);
+                return EXIT_FAILURE;
+            }
+        }
+        else
+        {
+            fprintf(stderr, "Unknown argument: %s\n", argv[i]);
+            return EXIT_FAILURE;
+        }
     }
 
     if (is_test)
     {
-        // Simulate notifications by logging
+        // Test mode doesn't need the log file, so ignore the -e argument if present
         send_notification("Test notification");
     }
     else
     {
-        const char *suricata_log = (argc > 1) ? argv[1] : "eve.json";
+        // Process the alerts from the specified log file
         process_alerts(suricata_log);
     }
 
