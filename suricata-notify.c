@@ -36,7 +36,7 @@ void print_help(void)
     printf("  -v, --verbose              Enable verbose output\n");
     printf("  -t, --test                 Run in test mode (send a test notification)\n");
     printf("  -e, --eve-json <file>      Specify the Suricata EVE JSON log file (default: /var/log/suricata/eve.json)\n");
-    printf("  -l, --line-length <length> Set the maximum line length for reading the log file (default: %zu)\n", DEFAULT_MAX_LINE_LENGTH);
+    printf("  -l, --line-length <length> Set the maximum line length for reading the log file (default: %d)\n", DEFAULT_MAX_LINE_LENGTH);
     printf("  -z, --timezone-offset <s>  Set the timezone offset in seconds (default: %d)\n", DEFAULT_TIMEZONE_OFFSET_SECONDS);
     printf("  -w, --alert-window <s>     Set the alert window in seconds (default: %d)\n", DEFAULT_ALERT_WINDOW_SECONDS);
 }
