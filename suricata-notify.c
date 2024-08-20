@@ -108,6 +108,11 @@ void process_alerts(const char *log_file)
 
     time_t current_time = time(NULL); // Get the current time
 
+    if (verbose)
+    {
+        printf("[DEBUG] Current Time: %s\n", current_time);
+    }
+
     while (fgets(line, max_line_length, file) != NULL)
     {
         if (verbose)
