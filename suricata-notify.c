@@ -63,8 +63,8 @@ time_t convert_iso8601_to_unix(const char *iso8601_timestamp)
 // Function to process Suricata alerts and trigger notifications
 void process_alerts(const char *log_file)
 {
-    printf("Suricata Alert");
-    execlp("notify-send", "notify-send", "Suricata Alert", "This is a test alert", (char *)NULL);
+    // printf("Suricata Alert");
+    // execlp("notify-send", "notify-send", "Suricata Alert", "This is a test alert", (char *)NULL);
     FILE *file = fopen(log_file, "r");
     if (file == NULL)
     {
@@ -89,11 +89,11 @@ void process_alerts(const char *log_file)
 
         // Check if the JSON object has the "event_type" field and it is "alert"
         json_t *event_type = json_object_get(root, "event_type");
-        if (json_is_string(event_type) && strcmp(json_string_value(event_type), "alert") == 0)
+        if (event_type && json_is_string(event_type) && strcmp(json_string_value(event_type), "alert") == 0)
         {
             // Extract the timestamp
             json_t *alert_timestamp_json = json_object_get(root, "timestamp");
-            if (json_is_string(alert_timestamp_json))
+            if (alert_timestamp_json && json_is_string(alert_timestamp_json))
             {
                 time_t alert_timestamp = convert_iso8601_to_unix(json_string_value(alert_timestamp_json));
 
@@ -101,13 +101,13 @@ void process_alerts(const char *log_file)
                 if (difftime(current_time, alert_timestamp) <= ALERT_WINDOW_SECONDS)
                 {
                     json_t *alert = json_object_get(root, "alert");
-                    if (json_is_object(alert))
+                    if (alert && json_is_object(alert))
                     {
                         // Extract the signature and category
                         json_t *signature_json = json_object_get(alert, "signature");
                         json_t *category_json = json_object_get(alert, "category");
 
-                        if (json_is_string(signature_json) && json_is_string(category_json))
+                        if (signature_json && json_is_string(signature_json) && json_is_string(category_json))
                         {
                             // Create the alert message
                             char alert_message[MAX_LINE_LENGTH];
