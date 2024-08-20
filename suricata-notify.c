@@ -20,6 +20,7 @@ void process_alerts(const char *log_file);
 // Function to send a desktop notification with signature and category
 void send_notification(const char *alert_message)
 {
+    printf("Mock notify-send: %s\n", alert_message);
     pid_t pid = fork();
 
     if (pid < 0)
