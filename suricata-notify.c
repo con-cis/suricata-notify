@@ -63,8 +63,6 @@ time_t convert_iso8601_to_unix(const char *iso8601_timestamp)
 // Function to process Suricata alerts and trigger notifications
 void process_alerts(const char *log_file)
 {
-    // printf("Suricata Alert");
-    // execlp("notify-send", "notify-send", "Suricata Alert", "This is a test alert", (char *)NULL);
     FILE *file = fopen(log_file, "r");
     if (file == NULL)
     {
@@ -142,7 +140,7 @@ int main(int argc, char *argv[])
     }
     else
     {
-        const char *suricata_log = (argc > 1) ? argv[1] : "/var/log/suricata/eve.json";
+        const char *suricata_log = (argc > 1) ? argv[1] : "eve.json";
         process_alerts(suricata_log);
     }
 
