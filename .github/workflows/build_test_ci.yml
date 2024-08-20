@@ -55,7 +55,7 @@ jobs:
         #   echo 'TEST DATA: [{"timestamp":"$current_time", "flow_id":1234567890123456, "pcap_cnt":150, "event_type":"alert", "src_ip":"192.168.1.100", "src_port":8080, "dest_ip":"10.0.0.5", "dest_port":80, "proto":"TCP", "pkt_src":"wire/pcap", "ether":{"src_mac":"00:11:22:33:44:55", "dest_mac":"66:77:88:99:AA:BB"}, "tx_id":2, "alert":{"action":"allowed", "gid":1, "signature_id":1000001, "rev":1, "signature":"Test Signature Example", "category":"Test Category", "severity":2, "metadata":{"affected_product":["Linux_Server_64_Bit"], "attack_target":["Server_Endpoint"], "created_at":["2024_08_20"], "deployment":["Perimeter"], "former_category":["TEST_RESPONSE"], "signature_severity":["Minor"], "updated_at":["2024_08_20"]}}, "http":{"hostname":"example.com", "http_port":8080, "url":"/test", "http_content_type":"application/json", "http_method":"GET", "protocol":"HTTP/1.1", "status":200, "length":1024}, "files":[{"filename":"/test", "gaps":false, "state":"CLOSED", "stored":false, "size":1024, "tx_id":2}], "app_proto":"http", "direction":"to_server", "flow":{"pkts_toserver":10, "pkts_toclient":8, "bytes_toserver":2048, "bytes_toclient":4096, "start":"2024-08-20T15:29:50.000000+0000", "src_ip":"10.0.0.5", "dest_ip":"192.168.1.100", "src_port":80, "dest_port":8080}}]'
         #   echo '[{"timestamp":"$current_time", "flow_id":1234567890123456, "pcap_cnt":150, "event_type":"alert", "src_ip":"192.168.1.100", "src_port":8080, "dest_ip":"10.0.0.5", "dest_port":80, "proto":"TCP", "pkt_src":"wire/pcap", "ether":{"src_mac":"00:11:22:33:44:55", "dest_mac":"66:77:88:99:AA:BB"}, "tx_id":2, "alert":{"action":"allowed", "gid":1, "signature_id":1000001, "rev":1, "signature":"Test Signature Example", "category":"Test Category", "severity":2, "metadata":{"affected_product":["Linux_Server_64_Bit"], "attack_target":["Server_Endpoint"], "created_at":["2024_08_20"], "deployment":["Perimeter"], "former_category":["TEST_RESPONSE"], "signature_severity":["Minor"], "updated_at":["2024_08_20"]}}, "http":{"hostname":"example.com", "http_port":8080, "url":"/test", "http_content_type":"application/json", "http_method":"GET", "protocol":"HTTP/1.1", "status":200, "length":1024}, "files":[{"filename":"/test", "gaps":false, "state":"CLOSED", "stored":false, "size":1024, "tx_id":2}], "app_proto":"http", "direction":"to_server", "flow":{"pkts_toserver":10, "pkts_toclient":8, "bytes_toserver":2048, "bytes_toclient":4096, "start":"2024-08-20T15:29:50.000000+0000", "src_ip":"10.0.0.5", "dest_ip":"192.168.1.100", "src_port":80, "dest_port":8080}}]' > eve.json
         run: |
-          current_time=$(date --utc +"%Y-%m-%dT%H:%M:%S.%6NZ")
+          current_time=$(date --utc +"%Y-%m-%dT%H:%M:%S.%6N%z")
           echo "Current Time: $current_time"
 
           # Create the JSON data with the timestamp embedded
@@ -71,7 +71,7 @@ jobs:
             echo "Starting dbus-session...";
             eval $(dbus-launch --sh-syntax --exit-with-session);
             echo "Running suricata-notify with strace..."
-            strace -o /tmp/suricata-notify-strace.log ./suricata-notify eve.json
+            strace -o /tmp/suricata-notify-strace.log ./suricata-notify -v eve.json
           '
 
       - name: Upload Strace Log

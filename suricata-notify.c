@@ -12,6 +12,9 @@
 #define TIMEZONE_OFFSET_SECONDS 3600
 #define ALERT_WINDOW_SECONDS 60
 
+// Global verbose flag
+int verbose = 0;
+
 // Function prototypes
 void send_notification(const char *alert_message);
 time_t convert_iso8601_to_unix(const char *iso8601_timestamp);
@@ -20,6 +23,11 @@ void process_alerts(const char *log_file);
 // Function to send a desktop notification with signature and category
 void send_notification(const char *alert_message)
 {
+    if (verbose)
+    {
+        printf("[DEBUG] Sending notification: %s\n", alert_message);
+    }
+
     pid_t pid = fork();
 
     if (pid < 0)
@@ -51,13 +59,25 @@ time_t convert_iso8601_to_unix(const char *iso8601_timestamp)
     struct tm tm_time;
     memset(&tm_time, 0, sizeof(struct tm));
 
+    if (verbose)
+    {
+        printf("[DEBUG] Converting timestamp: %s\n", iso8601_timestamp);
+    }
+
     if (strptime(iso8601_timestamp, "%Y-%m-%dT%H:%M:%S.%6N%z", &tm_time) == NULL)
     {
         fprintf(stderr, "Failed to parse timestamp: %s\n", iso8601_timestamp);
         return (time_t)-1;
     }
 
-    return mktime(&tm_time) - TIMEZONE_OFFSET_SECONDS;
+    time_t converted_time = mktime(&tm_time) - TIMEZONE_OFFSET_SECONDS;
+
+    if (verbose)
+    {
+        printf("[DEBUG] Converted time: %ld\n", converted_time);
+    }
+
+    return converted_time;
 }
 
 // Function to process Suricata alerts and trigger notifications
@@ -70,11 +90,21 @@ void process_alerts(const char *log_file)
         return;
     }
 
+    if (verbose)
+    {
+        printf("[DEBUG] Processing alerts from log file: %s\n", log_file);
+    }
+
     char line[MAX_LINE_LENGTH];
     time_t current_time = time(NULL); // Get the current time
 
     while (fgets(line, sizeof(line), file) != NULL)
     {
+        if (verbose)
+        {
+            printf("[DEBUG] Reading line: %s\n", line);
+        }
+
         // Load the JSON object from the line
         json_error_t error;
         json_t *root = json_loads(line, 0, &error);
@@ -96,8 +126,8 @@ void process_alerts(const char *log_file)
                 time_t alert_timestamp = convert_iso8601_to_unix(json_string_value(alert_timestamp_json));
 
                 // Check if the alert occurred within the last ALERT_WINDOW_SECONDS
-                // if (difftime(current_time, alert_timestamp) <= ALERT_WINDOW_SECONDS)
-                // {
+                if (difftime(current_time, alert_timestamp) <= ALERT_WINDOW_SECONDS)
+                {
                     json_t *alert = json_object_get(root, "alert");
                     if (alert && json_is_object(alert))
                     {
@@ -113,7 +143,7 @@ void process_alerts(const char *log_file)
                             send_notification(alert_message);
                         }
                     }
-                // }
+                }
             }
         }
 
@@ -126,6 +156,16 @@ void process_alerts(const char *log_file)
 int main(int argc, char *argv[])
 {
     int is_test = 0;
+
+    // Check for verbose flag
+    for (int i = 1; i < argc; i++)
+    {
+        if (strcmp(argv[i], "-v") == 0 || strcmp(argv[i], "--verbose") == 0)
+        {
+            verbose = 1;
+            break;
+        }
+    }
 
     // Check if the flag for testing mode is passed
     if (argc > 1 && strcmp(argv[1], "--test") == 0)
