@@ -83,6 +83,21 @@ time_t convert_iso8601_to_unix(const char *iso8601_timestamp)
     return converted_time;
 }
 
+void get_iso8601_timestamp(char *buffer, size_t buffer_size)
+{
+    struct timeval tv;
+    gettimeofday(&tv, NULL); // Get the current time including microseconds
+
+    struct tm tm_info;
+    gmtime_r(&tv.tv_sec, &tm_info); // Convert to UTC
+
+    // Format date and time including seconds
+    strftime(buffer, buffer_size, "%Y-%m-%dT%H:%M:%S", &tm_info);
+
+    // Append microseconds and timezone
+    snprintf(buffer + strlen(buffer), buffer_size - strlen(buffer), ".%06ld+0000", tv.tv_usec);
+}
+
 // Function to process Suricata alerts and trigger notifications
 void process_alerts(const char *log_file)
 {
@@ -112,6 +127,11 @@ void process_alerts(const char *log_file)
     {
         printf("[DEBUG] Current Time: %ld\n", (long)current_time);
     }
+
+    char iso8601_timestamp[40];
+    get_iso8601_timestamp(iso8601_timestamp, sizeof(iso8601_timestamp));
+
+    printf("[DEBUG] Current Time: %s\n", iso8601_timestamp);
 
     while (fgets(line, max_line_length, file) != NULL)
     {
