@@ -184,7 +184,8 @@ void process_alerts(const char *log_file)
                     {
                         if (verbose)
                         {
-                            printf("[DEBUG] Alert occurred within the last %d seconds with a diff of %d.\n", alert_window_seconds, difftime(current_time, alert_timestamp));
+                            double diff = difftime(current_time, alert_timestamp);
+                            printf("[DEBUG] Alert occurred within the last %d seconds with a diff of %.0f seconds.\n", alert_window_seconds, diff);
                         }
 
                         json_t *alert = json_object_get(root, "alert");
