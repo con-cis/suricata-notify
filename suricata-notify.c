@@ -174,7 +174,7 @@ void process_alerts(const char *log_file)
         exit(EXIT_FAILURE);
     }
     
-    FILE *file = fopen(sanatized_log_file, "r");
+    FILE *file = fopen(log_file, "r");
     if (file == NULL)
     {
         perror("Error opening file");
