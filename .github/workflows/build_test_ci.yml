@@ -23,7 +23,7 @@ jobs:
         run: gcc -o suricata-notify suricata-notify.c -ljansson
 
       - name: Upload Build Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: suricata-notify
           path: suricata-notify
@@ -35,7 +35,7 @@ jobs:
 
     steps:
       - name: Download Artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: suricata-notify
           path: ./
@@ -74,7 +74,7 @@ jobs:
           '
 
       - name: Upload Strace Log
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: strace-log
           path: /tmp/suricata-notify-strace.log
