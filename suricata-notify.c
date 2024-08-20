@@ -63,19 +63,32 @@ time_t convert_iso8601_to_unix(const char *iso8601_timestamp)
     struct tm tm_time;
     memset(&tm_time, 0, sizeof(struct tm));
 
+    char timestamp_without_microseconds[30]; // Buffer for timestamp without microseconds
+    long microseconds;
+
     if (verbose)
     {
         printf("[DEBUG] Converting timestamp: %s\n", iso8601_timestamp);
     }
 
-    if (strptime(iso8601_timestamp, "%Y-%m-%dT%H:%M:%S.%6N%z", &tm_time) == NULL)
+    // Extract the timestamp part without microseconds and the microseconds separately
+    if (sscanf(iso8601_timestamp, "%19s.%6ld%5s", timestamp_without_microseconds, &microseconds, NULL) != 3)
     {
         fprintf(stderr, "Failed to parse timestamp: %s\n", iso8601_timestamp);
         return (time_t)-1;
     }
 
-    time_t converted_time = mktime(&tm_time) - timezone_offset_seconds;
+    if (strptime(timestamp_without_microseconds, "%Y-%m-%dT%H:%M:%S", &tm_time) == NULL)
+    {
+        fprintf(stderr, "Failed to parse timestamp: %s\n", iso8601_timestamp);
+        return (time_t)-1;
+    }
 
+    // Convert to time_t (Unix timestamp)
+    time_t converted_time = mktime(&tm_time);
+
+    // Optionally adjust for microseconds or just ignore them
+    // Note: converted_time is in seconds, and microseconds can be used if needed for precision
     if (verbose)
     {
         printf("[DEBUG] Converted time: %ld\n", converted_time);
