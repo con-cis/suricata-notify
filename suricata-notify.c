@@ -180,11 +180,11 @@ void process_alerts(const char *log_file)
                     time_t alert_timestamp = convert_iso8601_to_unix(json_string_value(alert_timestamp_json));
 
                     // Check if the alert occurred within the last ALERT_WINDOW_SECONDS
-                    if (difftime(alert_timestamp, current_time) <= alert_window_seconds)
+                    if (difftime(current_time, alert_timestamp) <= alert_window_seconds)
                     {
                         if (verbose)
                         {
-                            printf("[DEBUG] Alert occurred within the last %d seconds.\n", alert_window_seconds);
+                            printf("[DEBUG] Alert occurred within the last %d seconds with a diff of %d.\n", alert_window_seconds, difftime(current_time, alert_timestamp));
                         }
 
                         json_t *alert = json_object_get(root, "alert");
