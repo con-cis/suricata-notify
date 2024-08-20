@@ -77,7 +77,7 @@ jobs:
       - name: Check Strace Log
         run: |
           # Check for specific output in the strace log to determine success
-          if grep -q "Test notification" /tmp/suricata-notify-strace.log; then
+          if grep -q "Suricata Alert" /tmp/suricata-notify-strace.log; then
             echo "Notification test passed"
             exit 0
           else

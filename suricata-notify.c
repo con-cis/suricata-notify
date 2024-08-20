@@ -20,7 +20,6 @@ void process_alerts(const char *log_file);
 // Function to send a desktop notification with signature and category
 void send_notification(const char *alert_message)
 {
-    printf("Mock notify-send: %s\n", alert_message);
     pid_t pid = fork();
 
     if (pid < 0)
@@ -142,9 +141,6 @@ int main(int argc, char *argv[])
     else
     {
         const char *suricata_log = (argc > 1) ? argv[1] : "/var/log/suricata/eve.json";
-        printf("Test notification");
-        printf("Test notification");
-        printf("Test notification");
         process_alerts(suricata_log);
     }
 
