@@ -116,10 +116,63 @@ void get_iso8601_timestamp(char *buffer, size_t buffer_size)
     snprintf(buffer + strlen(buffer), buffer_size - strlen(buffer), ".%06ld+0000", tv.tv_usec);
 }
 
+int sanitize_file_input(const char *log_file)
+{
+    if (log_file == NULL)
+    {
+        fprintf(stderr, "Error: log_file is NULL.\n");
+        return -1;
+    }
+
+    // Check if the path is absolute (optional, based on use case)
+    if (log_file[0] != '/')
+    {
+        fprintf(stderr, "Error: log_file path is not absolute.\n");
+        return -1;
+    }
+
+    // Check for potential path traversal (../)
+    if (strstr(log_file, "../") != NULL)
+    {
+        fprintf(stderr, "Error: log_file path contains path traversal components.\n");
+        return -1;
+    }
+
+    // Check file permissions and type
+    struct stat file_stat;
+    if (stat(log_file, &file_stat) != 0)
+    {
+        perror("Error: stat failed");
+        return -1;
+    }
+
+    // Ensure it's a regular file
+    if (!S_ISREG(file_stat.st_mode))
+    {
+        fprintf(stderr, "Error: log_file is not a regular file.\n");
+        return -1;
+    }
+
+    // Ensure the file is readable
+    if ((file_stat.st_mode & S_IRUSR) == 0)
+    {
+        fprintf(stderr, "Error: log_file is not readable by the user.\n");
+        return -1;
+    }
+
+    return 0; // Return 0 if all checks pass
+}
+
 // Function to process Suricata alerts and trigger notifications
 void process_alerts(const char *log_file)
 {
-    FILE *file = fopen(log_file, "r");
+    // Sanitize the file path before opening
+    if (sanitize_file_input(log_file) != 0)
+    {
+        exit(EXIT_FAILURE);
+    }
+    
+    FILE *file = fopen(sanatized_log_file, "r");
     if (file == NULL)
     {
         perror("Error opening file");
