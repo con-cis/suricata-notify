@@ -115,39 +115,114 @@ void process_alerts(const char *log_file)
             continue;
         }
 
+        if (verbose)
+        {
+            printf("[DEBUG] Successfully parsed JSON object.\n");
+        }
+
         // Check if the JSON object has the "event_type" field and it is "alert"
         json_t *event_type = json_object_get(root, "event_type");
-        if (event_type && json_is_string(event_type) && strcmp(json_string_value(event_type), "alert") == 0)
+        if (event_type && json_is_string(event_type))
         {
-            // Extract the timestamp
-            json_t *alert_timestamp_json = json_object_get(root, "timestamp");
-            if (alert_timestamp_json && json_is_string(alert_timestamp_json))
+            if (verbose)
             {
-                time_t alert_timestamp = convert_iso8601_to_unix(json_string_value(alert_timestamp_json));
+                printf("[DEBUG] Event type found: %s\n", json_string_value(event_type));
+            }
 
-                // Check if the alert occurred within the last ALERT_WINDOW_SECONDS
-                if (difftime(current_time, alert_timestamp) <= ALERT_WINDOW_SECONDS)
+            if (strcmp(json_string_value(event_type), "alert") == 0)
+            {
+                // Extract the timestamp
+                json_t *alert_timestamp_json = json_object_get(root, "timestamp");
+                if (alert_timestamp_json && json_is_string(alert_timestamp_json))
                 {
-                    json_t *alert = json_object_get(root, "alert");
-                    if (alert && json_is_object(alert))
+                    if (verbose)
                     {
-                        // Extract the signature and category
-                        json_t *signature_json = json_object_get(alert, "signature");
-                        json_t *category_json = json_object_get(alert, "category");
+                        printf("[DEBUG] Alert timestamp found: %s\n", json_string_value(alert_timestamp_json));
+                    }
 
-                        if (signature_json && json_is_string(signature_json) && json_is_string(category_json))
+                    time_t alert_timestamp = convert_iso8601_to_unix(json_string_value(alert_timestamp_json));
+
+                    // Check if the alert occurred within the last ALERT_WINDOW_SECONDS
+                    if (difftime(current_time, alert_timestamp) <= ALERT_WINDOW_SECONDS)
+                    {
+                        if (verbose)
                         {
-                            // Create the alert message
-                            char alert_message[MAX_LINE_LENGTH];
-                            snprintf(alert_message, sizeof(alert_message), "Category: %s\nSignature: %s", json_string_value(category_json), json_string_value(signature_json));
-                            send_notification(alert_message);
+                            printf("[DEBUG] Alert occurred within the last %d seconds.\n", ALERT_WINDOW_SECONDS);
                         }
+
+                        json_t *alert = json_object_get(root, "alert");
+                        if (alert && json_is_object(alert))
+                        {
+                            // Extract the signature and category
+                            json_t *signature_json = json_object_get(alert, "signature");
+                            json_t *category_json = json_object_get(alert, "category");
+
+                            if (signature_json && json_is_string(signature_json) && json_is_string(category_json))
+                            {
+                                if (verbose)
+                                {
+                                    printf("[DEBUG] Alert signature: %s\n", json_string_value(signature_json));
+                                    printf("[DEBUG] Alert category: %s\n", json_string_value(category_json));
+                                }
+
+                                // Create the alert message
+                                char alert_message[MAX_LINE_LENGTH];
+                                snprintf(alert_message, sizeof(alert_message), "Category: %s\nSignature: %s", json_string_value(category_json), json_string_value(signature_json));
+
+                                if (verbose)
+                                {
+                                    printf("[DEBUG] Sending notification: %s\n", alert_message);
+                                }
+
+                                send_notification(alert_message);
+                            }
+                            else
+                            {
+                                if (verbose)
+                                {
+                                    printf("[DEBUG] Missing or invalid 'signature' or 'category' field in alert.\n");
+                                }
+                            }
+                        }
+                        else
+                        {
+                            if (verbose)
+                            {
+                                printf("[DEBUG] 'alert' field is missing or is not an object.\n");
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (verbose)
+                        {
+                            printf("[DEBUG] Alert is older than %d seconds, skipping notification.\n", ALERT_WINDOW_SECONDS);
+                        }
+                    }
+                }
+                else
+                {
+                    if (verbose)
+                    {
+                        printf("[DEBUG] Missing or invalid 'timestamp' field in alert.\n");
                     }
                 }
             }
         }
+        else
+        {
+            if (verbose)
+            {
+                printf("[DEBUG] 'event_type' field is missing or is not a string.\n");
+            }
+        }
 
         json_decref(root);
+    }
+
+    if (verbose)
+    {
+        printf("[DEBUG] Finished processing alerts.\n");
     }
 
     fclose(file);
