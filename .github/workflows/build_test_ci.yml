@@ -62,16 +62,6 @@ jobs:
             strace -o /tmp/suricata-notify-strace.log ./suricata-notify --test
           '
 
-      - name: Add man test notification
-        run: |
-          # Run the program in a virtual display and capture strace logs
-            export DISPLAY=:99 && xvfb-run -a -s "-screen 0 1024x768x24" sh -c '
-            echo "Starting dbus-session...";
-            eval $(dbus-launch --sh-syntax --exit-with-session);
-            echo "Running suricata-notify with strace..."
-            strace -o /tmp/suricata-notify-strace.log /usr/bin/notify-send "Test Notification" "This is a test message."
-          '
-
       - name: Upload Strace Log
         uses: actions/upload-artifact@v3
         with:
@@ -87,7 +77,7 @@ jobs:
       - name: Check Strace Log
         run: |
           # Check for specific output in the strace log to determine success
-          if grep -q "notify-send" /tmp/suricata-notify-strace.log; then
+          if grep -q "Test notification" /tmp/suricata-notify-strace.log; then
             echo "Notification test passed"
             exit 0
           else
