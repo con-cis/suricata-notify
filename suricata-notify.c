@@ -23,6 +23,21 @@ int alert_window_seconds = DEFAULT_ALERT_WINDOW_SECONDS;
 void send_notification(const char *alert_message);
 time_t convert_iso8601_to_unix(const char *iso8601_timestamp);
 void process_alerts(const char *log_file);
+void print_help(void);
+
+// Add the help message function
+void print_help(void)
+{
+    printf("Usage: suricata-notify [options]\n");
+    printf("Options:\n");
+    printf("  -h, --help                 Show this help message and exit\n");
+    printf("  -v, --verbose              Enable verbose output\n");
+    printf("  -t, --test                 Run in test mode (send a test notification)\n");
+    printf("  -e, --eve-json <file>      Specify the Suricata EVE JSON log file (default: /var/log/suricata/eve.json)\n");
+    printf("  -l, --line-length <length> Set the maximum line length for reading the log file (default: %zu)\n", DEFAULT_MAX_LINE_LENGTH);
+    printf("  -z, --timezone-offset <s>  Set the timezone offset in seconds (default: %d)\n", DEFAULT_TIMEZONE_OFFSET_SECONDS);
+    printf("  -w, --alert-window <s>     Set the alert window in seconds (default: %d)\n", DEFAULT_ALERT_WINDOW_SECONDS);
+}
 
 // Function to send a desktop notification with signature and category
 void send_notification(const char *alert_message)
@@ -274,7 +289,12 @@ int main(int argc, char *argv[])
 
     for (int i = 1; i < argc; i++)
     {
-        if (strcmp(argv[i], "-v") == 0 || strcmp(argv[i], "--verbose") == 0)
+        if (strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0)
+        {
+            print_help();
+            return EXIT_SUCCESS;
+        }
+        else if (strcmp(argv[i], "-v") == 0 || strcmp(argv[i], "--verbose") == 0)
         {
             verbose = 1;
         }

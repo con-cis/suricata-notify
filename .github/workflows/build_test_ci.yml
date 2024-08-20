@@ -49,6 +49,9 @@ jobs:
       - name: Make Executable
         run: chmod +x suricata-notify
 
+      - name: Show Help
+        run: ./suricata-notify --help
+
       - name: Create Test Data
         run: |
           current_time=$(date --utc --date="-33 seconds" +"%Y-%m-%dT%H:%M:%S.%6NZ")
@@ -77,18 +80,21 @@ jobs:
           path: /tmp/suricata-notify-strace.log
           retention-days: 30
 
-      - name: Display Strace Log
-        run: |
-          echo "Displaying strace log:"
-          cat /tmp/suricata-notify-strace.log
-
       - name: Check Strace Log
         run: |
           # Check for specific output in the strace log to determine success
+
+          # Check if the log contains the specific message we expect to send with notify-send
           if grep -q "Test Category" /tmp/suricata-notify-strace.log; then
-            echo "Notification test passed"
-            exit 0
+            # Check if notify-send exited successfully
+            if grep -q "notify-send failed" /tmp/suricata-notify-strace.log; then
+              echo "Notification test failed due to notify-send error"
+              exit 1
+            else
+              echo "Notification test passed"
+              exit 0
+            fi
           else
-            echo "Notification test failed"
+            echo "Notification test failed: Message not found in strace log"
             exit 1
           fi
