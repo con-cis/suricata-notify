@@ -44,7 +44,6 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y xvfb strace libnotify-bin dbus-x11
-          # sudo apt-get install -y xvfb xfce4-notifyd x11-apps x11-utils strace libnotify-bin dbus-x11
 
       - name: Make Executable
         run: chmod +x suricata-notify
@@ -66,7 +65,7 @@ jobs:
             echo "Starting dbus-session...";
             eval $(dbus-launch --sh-syntax --exit-with-session);
             echo "Running suricata-notify with strace..."
-            strace -f -c -o /tmp/suricata-notify-strace.log ./suricata-notify -v -w 60 -z 0 -e eve.json
+            strace -f -o /tmp/suricata-notify-strace.log ./suricata-notify -v -w 60 -z 0 -e eve.json
           '
 
       - name: Upload Strace Log
