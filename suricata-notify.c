@@ -176,7 +176,7 @@ void process_alerts(const char *log_file)
                                 }
 
                                 // Create the alert message
-                                char alert_message[MAX_LINE_LENGTH];
+                                char alert_message[max_line_length];
                                 snprintf(alert_message, sizeof(alert_message), "Category: %s\nSignature: %s", json_string_value(category_json), json_string_value(signature_json));
 
                                 if (verbose)
