@@ -126,13 +126,6 @@ int sanitize_file_input(const char *log_file)
         return -1;
     }
 
-    // Check if the path is absolute (optional, based on use case)
-    if (log_file[0] != '/')
-    {
-        fprintf(stderr, "Error: log_file path is not absolute.\n");
-        return -1;
-    }
-
     // Check for potential path traversal (../)
     if (strstr(log_file, "../") != NULL)
     {
