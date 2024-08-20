@@ -127,12 +127,11 @@ void process_alerts(const char *log_file)
     if (verbose)
     {
         printf("[DEBUG] Current Time: %ld\n", (long)current_time);
+        char iso8601_timestamp[40];
+        get_iso8601_timestamp(iso8601_timestamp, sizeof(iso8601_timestamp));
+
+        printf("[DEBUG] Current Time: %s\n", iso8601_timestamp);
     }
-
-    char iso8601_timestamp[40];
-    get_iso8601_timestamp(iso8601_timestamp, sizeof(iso8601_timestamp));
-
-    printf("[DEBUG] Current Time: %s\n", iso8601_timestamp);
 
     while (fgets(line, max_line_length, file) != NULL)
     {
