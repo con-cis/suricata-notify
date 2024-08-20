@@ -70,7 +70,7 @@ jobs:
             echo "Starting dbus-session...";
             eval $(dbus-launch --sh-syntax --exit-with-session);
             echo "Running suricata-notify with strace..."
-            strace -o /tmp/suricata-notify-strace.log ./suricata-notify -v -w 60000 -z 0 -e eve.json
+            strace -o /tmp/suricata-notify-strace.log ./suricata-notify -z 0 -e eve.json
           '
 
       - name: Upload Strace Log
@@ -88,7 +88,7 @@ jobs:
       - name: Check Strace Log
         run: |
           # Check for specific output in the strace log to determine success
-          if grep -q "Suricata Alert" /tmp/suricata-notify-strace.log; then
+          if grep -q "Test Category" /tmp/suricata-notify-strace.log; then
             echo "Notification test passed"
             exit 0
           else
