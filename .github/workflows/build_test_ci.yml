@@ -70,7 +70,7 @@ jobs:
             echo "Starting dbus-session...";
             eval $(dbus-launch --sh-syntax --exit-with-session);
             echo "Running suricata-notify with strace..."
-            strace -o /tmp/suricata-notify-strace.log ./suricata-notify -v -w 60000 -z 7400 -e eve.json
+            strace -o /tmp/suricata-notify-strace.log ./suricata-notify -v -w 60000 -z 0 -e eve.json
           '
 
       - name: Upload Strace Log
