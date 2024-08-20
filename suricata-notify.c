@@ -8,12 +8,15 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
-#define MAX_LINE_LENGTH 4096
-#define TIMEZONE_OFFSET_SECONDS 3600
-#define ALERT_WINDOW_SECONDS 60
+#define DEFAULT_MAX_LINE_LENGTH 4096
+#define DEFAULT_TIMEZONE_OFFSET_SECONDS 3600
+#define DEFAULT_ALERT_WINDOW_SECONDS 60
 
-// Global verbose flag
+// Global variables for configuration
 int verbose = 0;
+size_t max_line_length = DEFAULT_MAX_LINE_LENGTH;
+int timezone_offset_seconds = DEFAULT_TIMEZONE_OFFSET_SECONDS;
+int alert_window_seconds = DEFAULT_ALERT_WINDOW_SECONDS;
 
 // Function prototypes
 void send_notification(const char *alert_message);
@@ -70,7 +73,7 @@ time_t convert_iso8601_to_unix(const char *iso8601_timestamp)
         return (time_t)-1;
     }
 
-    time_t converted_time = mktime(&tm_time) - TIMEZONE_OFFSET_SECONDS;
+    time_t converted_time = mktime(&tm_time) - timezone_offset_seconds;
 
     if (verbose)
     {
@@ -95,10 +98,17 @@ void process_alerts(const char *log_file)
         printf("[DEBUG] Processing alerts from log file: %s\n", log_file);
     }
 
-    char line[MAX_LINE_LENGTH];
+    char *line = (char *)malloc(max_line_length);
+    if (line == NULL)
+    {
+        perror("Error allocating memory for line buffer");
+        fclose(file);
+        return;
+    }
+
     time_t current_time = time(NULL); // Get the current time
 
-    while (fgets(line, sizeof(line), file) != NULL)
+    while (fgets(line, max_line_length, file) != NULL)
     {
         if (verbose)
         {
@@ -143,11 +153,11 @@ void process_alerts(const char *log_file)
                     time_t alert_timestamp = convert_iso8601_to_unix(json_string_value(alert_timestamp_json));
 
                     // Check if the alert occurred within the last ALERT_WINDOW_SECONDS
-                    if (difftime(current_time, alert_timestamp) <= ALERT_WINDOW_SECONDS)
+                    if (difftime(current_time, alert_timestamp) <= alert_window_seconds)
                     {
                         if (verbose)
                         {
-                            printf("[DEBUG] Alert occurred within the last %d seconds.\n", ALERT_WINDOW_SECONDS);
+                            printf("[DEBUG] Alert occurred within the last %d seconds.\n", alert_window_seconds);
                         }
 
                         json_t *alert = json_object_get(root, "alert");
@@ -196,7 +206,7 @@ void process_alerts(const char *log_file)
                     {
                         if (verbose)
                         {
-                            printf("[DEBUG] Alert is older than %d seconds, skipping notification.\n", ALERT_WINDOW_SECONDS);
+                            printf("[DEBUG] Alert is older than %d seconds, skipping notification.\n", alert_window_seconds);
                         }
                     }
                 }
@@ -225,6 +235,7 @@ void process_alerts(const char *log_file)
         printf("[DEBUG] Finished processing alerts.\n");
     }
 
+    free(line);
     fclose(file);
 }
 
@@ -249,6 +260,45 @@ int main(int argc, char *argv[])
             {
                 suricata_log = argv[i + 1]; // Get the log file name
                 i++;                        // Skip the log file argument
+            }
+            else
+            {
+                fprintf(stderr, "Error: Missing argument for %s\n", argv[i]);
+                return EXIT_FAILURE;
+            }
+        }
+        else if (strcmp(argv[i], "-l") == 0 || strcmp(argv[i], "--line-length") == 0)
+        {
+            if (i + 1 < argc)
+            {
+                max_line_length = strtoul(argv[i + 1], NULL, 10);
+                i++;
+            }
+            else
+            {
+                fprintf(stderr, "Error: Missing argument for %s\n", argv[i]);
+                return EXIT_FAILURE;
+            }
+        }
+        else if (strcmp(argv[i], "-z") == 0 || strcmp(argv[i], "--timezone-offset") == 0)
+        {
+            if (i + 1 < argc)
+            {
+                timezone_offset_seconds = atoi(argv[i + 1]);
+                i++;
+            }
+            else
+            {
+                fprintf(stderr, "Error: Missing argument for %s\n", argv[i]);
+                return EXIT_FAILURE;
+            }
+        }
+        else if (strcmp(argv[i], "-w") == 0 || strcmp(argv[i], "--alert-window") == 0)
+        {
+            if (i + 1 < argc)
+            {
+                alert_window_seconds = atoi(argv[i + 1]);
+                i++;
             }
             else
             {
