@@ -23,42 +23,78 @@ jobs:
         run: gcc -o suricata-notify suricata-notify.c -ljansson
 
       - name: Upload Build Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: suricata-notify
           path: suricata-notify
           retention-days: 30
 
-  download:
+  test:
     runs-on: ubuntu-latest
     needs: build
 
     steps:
       - name: Download Artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: suricata-notify
           path: ./
+
       - name: Install Dependencies
         run: |
-            sudo apt-get update
-            sudo apt-get install -y build-essential xvfb libnotify-bin strace
-
-      - name: List Downloaded Files
-        run: ls -la
+          sudo apt-get update
+          # sudo apt-get install -y xvfb strace libnotify-bin dbus-x11
+          sudo apt-get install -y xvfb xfce4-notifyd x11-apps x11-utils strace libnotify-bin dbus-x11
 
       - name: Make Executable
         run: chmod +x suricata-notify
 
-      - name: Create Test Data
-        run: echo '[{"event_type":"alert","timestamp":"2023-08-02T00:05:06.384656+0200","alert":{"signature":"Test Signature 1","category":"Test Category 1"}},{"event_type":"alert","timestamp":"2023-08-02T00:06:00.000000+0200","alert":{"signature":"Test Signature 2","category":"Test Category 2"}},{"event_type":"alert","timestamp":"2023-08-02T00:07:00.000000+0200","alert":{"signature":"Test Signature 3","category":"Test Category 3"}}]' > eve.json
+      - name: Show Help
+        run: ./suricata-notify --help
 
-      - name: Prepare Virtual Display
-        run: xvfb-run -a -s "-screen 0 1024x768x24" sh -c "strace -o strace.log ./suricata-notify eve.json"
+      - name: Create Test Data
+        run: |
+          current_time=$(date --utc --date="-33 seconds" +"%Y-%m-%dT%H:%M:%S.%6NZ")
+          echo "Current Time: $current_time"
+          # Create the JSON data with the timestamp embedded
+          json_data='{"timestamp":"'"$current_time"'","flow_id":1234567890123456,"pcap_cnt":150,"event_type":"alert","src_ip":"192.168.1.100","src_port":8080,"dest_ip":"10.0.0.5","dest_port":80,"proto":"TCP","pkt_src":"wire/pcap","ether":{"src_mac":"00:11:22:33:44:55","dest_mac":"66:77:88:99:AA:BB"},"tx_id":2,"alert":{"action":"allowed","gid":1,"signature_id":1000001,"rev":1,"signature":"Test Signature Example","category":"Test Category","severity":2,"metadata":{"affected_product":["Linux_Server_64_Bit"],"attack_target":["Server_Endpoint"],"created_at":["2024_08_20"],"deployment":["Perimeter"],"former_category":["TEST_RESPONSE"],"signature_severity":["Minor"],"updated_at":["2024_08_20"]}},"http":{"hostname":"example.com","http_port":8080,"url":"/test","http_content_type":"application/json","http_method":"GET","protocol":"HTTP/1.1","status":200,"length":1024},"files":[{"filename":"/test","gaps":false,"state":"CLOSED","stored":false,"size":1024,"tx_id":2}],"app_proto":"http","direction":"to_server","flow":{"pkts_toserver":10,"pkts_toclient":8,"bytes_toserver":2048,"bytes_toclient":4096,"start":"2024-08-20T15:29:50.000000+0000","src_ip":"10.0.0.5","dest_ip":"192.168.1.100","src_port":80,"dest_port":8080}}'
+          echo "$json_data"
+          echo "$json_data" > eve.json
+          echo "Test data written to eve.json"
+
+      - name: Prepare Virtual Display and Test Notifications
+        run: |
+          # Run the program in a virtual display and capture strace logs
+            # export DISPLAY=:99 && xvfb-run -a -s "-screen 0 1024x768x24" sh -c '
+            export DISPLAY=:0 && xvfb-run -a -s "-screen 0 1024x768x24" sh -c '
+            echo "Starting dbus-session...";
+            eval $(dbus-launch --sh-syntax --exit-with-session);
+            echo "Running suricata-notify with strace..."
+            strace -f -o /tmp/suricata-notify-strace.log ./suricata-notify -v -w 60 -z 0 -e eve.json
+          '
 
       - name: Upload Strace Log
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: strace-log
-          path: strace.log
+          path: /tmp/suricata-notify-strace.log
           retention-days: 30
+
+      - name: Check Strace Log
+        run: |
+          # Check for specific output in the strace log to determine success
+
+          # Check if the log contains the specific message we expect to send with notify-send
+          if grep -q "Test Category" /tmp/suricata-notify-strace.log; then
+            # Check if notify-send exited successfully
+            if grep -q "notify-send failed" /tmp/suricata-notify-strace.log; then
+              echo "Notification test failed due to notify-send error"
+              exit 1
+            else
+              echo "Notification test passed"
+              exit 0
+            fi
+          else
+            echo "Notification test failed: Message not found in strace log"
+            exit 1
+          fi
