@@ -69,7 +69,7 @@ time_t convert_iso8601_to_unix(const char *iso8601_timestamp)
     }
 
     // Parse the timestamp up to seconds
-    if (strptime(iso8601_timestamp, "%Y-%m-%dT%H:%M:%S%z", &tm_time) == NULL)
+    if (strptime(iso8601_timestamp, "%Y-%m-%dT%H:%M:%S", &tm_time) == NULL)
     {
         fprintf(stderr, "Failed to parse timestamp: %s\n", iso8601_timestamp);
         return (time_t)-1;
@@ -80,7 +80,7 @@ time_t convert_iso8601_to_unix(const char *iso8601_timestamp)
 
     if (verbose)
     {
-        printf("[DEBUG] Converted time: %ld\n", converted_time);
+        printf("[DEBUG] Converted time: %ld\n", (long)converted_time);
     }
 
     return converted_time;
