@@ -44,7 +44,7 @@ void send_notification(const char *alert_message)
     //     }
     // }
     char command[MAX_LINE_LENGTH];
-    snprintf(command, sizeof(command), "notify-send \"Suricata Alert\" \"%s\"", alert_message);
+    snprintf(command, sizeof(command), "/usr/bin/notify-send \"Suricata Alert\" \"%s\"", alert_message);
     system(command);
     return 0;
 }
