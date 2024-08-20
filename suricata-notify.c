@@ -96,8 +96,8 @@ void process_alerts(const char *log_file)
                 time_t alert_timestamp = convert_iso8601_to_unix(json_string_value(alert_timestamp_json));
 
                 // Check if the alert occurred within the last ALERT_WINDOW_SECONDS
-                if (difftime(current_time, alert_timestamp) <= ALERT_WINDOW_SECONDS)
-                {
+                // if (difftime(current_time, alert_timestamp) <= ALERT_WINDOW_SECONDS)
+                // {
                     json_t *alert = json_object_get(root, "alert");
                     if (alert && json_is_object(alert))
                     {
@@ -113,7 +113,7 @@ void process_alerts(const char *log_file)
                             send_notification(alert_message);
                         }
                     }
-                }
+                // }
             }
         }
 
