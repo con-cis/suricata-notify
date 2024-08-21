@@ -60,7 +60,7 @@ Options:
   -t, --test                 Run in test mode (send a test notification)
   -e, --eve-json <file>      Specify the Suricata EVE JSON log file (default: /var/log/suricata/eve.json)
   -l, --line-length <length> Set the maximum line length for reading the log file (default: 4096)
-  -z, --timezone-offset <s>  Set the timezone offset in seconds (default: 3600)
+  -z, --timezone-offset <s>  Set the timezone offset in seconds (default: 0)
   -w, --alert-window <s>     Set the alert window in seconds (default: 60)
 ```
 

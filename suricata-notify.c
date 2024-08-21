@@ -12,7 +12,7 @@
 #include <sys/wait.h>
 
 #define DEFAULT_MAX_LINE_LENGTH 4096
-#define DEFAULT_TIMEZONE_OFFSET_SECONDS 3600
+#define DEFAULT_TIMEZONE_OFFSET_SECONDS 0
 #define DEFAULT_ALERT_WINDOW_SECONDS 60
 
 // Global variables for configuration
@@ -93,7 +93,7 @@ time_t convert_iso8601_to_unix(const char *iso8601_timestamp)
     }
 
     // Convert to time_t (Unix timestamp)
-    time_t converted_time = mktime(&tm_time);
+    time_t converted_time = mktime(&tm_time) + timezone_offset_seconds;
 
     if (verbose)
     {
@@ -103,6 +103,7 @@ time_t convert_iso8601_to_unix(const char *iso8601_timestamp)
     return converted_time;
 }
 
+// Function to get ISO 8601 timestamp
 void get_iso8601_timestamp(char *buffer, size_t buffer_size)
 {
     struct timeval tv;
@@ -118,6 +119,7 @@ void get_iso8601_timestamp(char *buffer, size_t buffer_size)
     snprintf(buffer + strlen(buffer), buffer_size - strlen(buffer), ".%06ld+0000", tv.tv_usec);
 }
 
+// Sanitize file inputs
 int sanitize_file_input(const char *log_file)
 {
     if (log_file == NULL)
