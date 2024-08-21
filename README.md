@@ -52,6 +52,17 @@ To test the desktop notification functionality, run the following command:
 ```bash
 ./suricata-notify
 ```
+Usage: suricata-notify [options]
+```bash
+Options:
+  -h, --help                 Show this help message and exit
+  -v, --verbose              Enable verbose output
+  -t, --test                 Run in test mode (send a test notification)
+  -e, --eve-json <file>      Specify the Suricata EVE JSON log file (default: /var/log/suricata/eve.json)
+  -l, --line-length <length> Set the maximum line length for reading the log file (default: 4096)
+  -z, --timezone-offset <s>  Set the timezone offset in seconds (default: 3600)
+  -w, --alert-window <s>     Set the alert window in seconds (default: 60)
+```
 
 This will parse the Suricata log file (`/var/log/suricata/eve.json` by default), filter alerts, and trigger notifications for valid alerts within the last 60 seconds.
 
