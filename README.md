@@ -53,7 +53,7 @@ To test the desktop notification functionality, run the following command:
 ./suricata-notify
 ```
 Usage: suricata-notify [options]
-```bash
+```
 Options:
   -h, --help                 Show this help message and exit
   -v, --verbose              Enable verbose output
